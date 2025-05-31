@@ -1,13 +1,11 @@
-// Operations.js
 "use client"
 
 import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import Layout from "../app/Layout"
-import { Wrench, Plus, Edit, Trash2, AlertCircle, Search, MoreVertical, Eye, Calendar, Check } from "lucide-react"
 import dayjs from "dayjs"
 
-// Custom UI Components (simplified for brevity)
+// Custom UI Components
 const Button = ({
   children,
   variant = "default",
@@ -145,7 +143,7 @@ const Select = ({ children, value, onValueChange, ...props }) => {
         onClick={() => setIsOpen(!isOpen)}
         {...props}
       >
-        <span>{value || "Select..."}</span>
+        <span>{value || "Sélectionner..."}</span>
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
@@ -170,6 +168,7 @@ const SelectItem = ({ children, value, onClick, ...props }) => (
   <div
     className="px-3 py-2 text-sm hover:bg-emerald-50 cursor-pointer first:rounded-t-xl last:rounded-b-xl"
     onClick={onClick}
+    value={value}
     {...props}
   >
     {children}
@@ -253,13 +252,13 @@ const Operations = () => {
   const navigate = useNavigate()
 
   const methods = ["Poussage", "Casement", "Transport"]
-  const machineStates = ["En marche", "À l’arrêt"]
+  const machineStates = ["En marche", "À l'arrêt"]
 
   // Fetch operations and machines
   const fetchOperations = async () => {
     const token = localStorage.getItem("token")
     if (!token) {
-      setError("No authentication token found. Please log in.")
+      setError("Aucun jeton d'authentification trouvé. Veuillez vous connecter.")
       localStorage.clear()
       navigate("/login")
       return
@@ -272,32 +271,32 @@ const Operations = () => {
 
       if (response.status === 401) {
         localStorage.clear()
-        setError("Session expired. Please log in again.")
+        setError("Session expirée. Veuillez vous reconnecter.")
         navigate("/login")
         return
       }
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to fetch operations")
+        throw new Error(errorData.message || "Échec de la récupération des opérations")
       }
 
       const data = await response.json()
       if (!data.success) {
-        throw new Error(data.message || "Failed to fetch operations")
+        throw new Error(data.message || "Échec de la récupération des opérations")
       }
 
       setOperations(data.data)
     } catch (err) {
-      console.error("Error fetching operations:", err)
-      setError(err.message || "Failed to load operations. Please try again.")
+      console.error("Erreur lors de la récupération des opérations:", err)
+      setError(err.message || "Échec du chargement des opérations. Veuillez réessayer.")
     }
   }
 
   const fetchMachines = async () => {
     const token = localStorage.getItem("token")
     if (!token) {
-      setError("No authentication token found. Please log in.")
+      setError("Aucun jeton d'authentification trouvé. Veuillez vous connecter.")
       localStorage.clear()
       navigate("/login")
       return
@@ -310,25 +309,25 @@ const Operations = () => {
 
       if (response.status === 401) {
         localStorage.clear()
-        setError("Session expired. Please log in again.")
+        setError("Session expirée. Veuillez vous reconnecter.")
         navigate("/login")
         return
       }
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to fetch machines")
+        throw new Error(errorData.message || "Échec de la récupération des machines")
       }
 
       const data = await response.json()
       if (!data.success) {
-        throw new Error(data.message || "Failed to fetch machines")
+        throw new Error(data.message || "Échec de la récupération des machines")
       }
 
       setMachines(data.data)
     } catch (err) {
-      console.error("Error fetching machines:", err)
-      setError(err.message || "Failed to load machines. Please try again.")
+      console.error("Erreur lors de la récupération des machines:", err)
+      setError(err.message || "Échec du chargement des machines. Veuillez réessayer.")
     }
   }
 
@@ -372,56 +371,56 @@ const Operations = () => {
 
   const validateForm = () => {
     if (!formData.ficheId) {
-      setFormError("Fiche ID is required.")
+      setFormError("L'ID de la fiche est requis.")
       return false
     }
     if (!formData.interventionDateTime) {
-      setFormError("Intervention date is required.")
+      setFormError("La date d'intervention est requise.")
       return false
     }
     if (!formData.decapingMethod || !methods.includes(formData.decapingMethod)) {
-      setFormError("Valid decaping method is required.")
+      setFormError("Une méthode de décapage valide est requise.")
       return false
     }
     if (!formData.machineId) {
-      setFormError("Machine is required.")
+      setFormError("La machine est requise.")
       return false
     }
     const selectedMachine = machines.find((m) => m._id === formData.machineId)
     if (!selectedMachine) {
-      setFormError("Selected machine not found.")
+      setFormError("Machine sélectionnée non trouvée.")
       return false
     }
     if (selectedMachine.method !== formData.decapingMethod) {
-      setFormError(`Machine ${selectedMachine.name} does not support ${formData.decapingMethod}.`)
+      setFormError(`La machine ${selectedMachine.name} ne prend pas en charge ${formData.decapingMethod}.`)
       return false
     }
     if (formData.operatingHours && isNaN(Number.parseFloat(formData.operatingHours))) {
-      setFormError("Operating hours must be a number.")
+      setFormError("Les heures de fonctionnement doivent être un nombre.")
       return false
     }
     if (formData.downtime && isNaN(Number.parseFloat(formData.downtime))) {
-      setFormError("Downtime must be a number.")
+      setFormError("Le temps d'arrêt doit être un nombre.")
       return false
     }
     if (formData.skippedVolume && isNaN(Number.parseFloat(formData.skippedVolume))) {
-      setFormError("Skipped volume must be a number.")
+      setFormError("Le volume sauté doit être un nombre.")
       return false
     }
     if (formData.profondeur && isNaN(Number.parseFloat(formData.profondeur))) {
-      setFormError("Profondeur must be a number.")
+      setFormError("La profondeur doit être un nombre.")
       return false
     }
     if (formData.nombreTrous && isNaN(Number.parseInt(formData.nombreTrous))) {
-      setFormError("Nombre de trous must be an integer.")
+      setFormError("Le nombre de trous doit être un entier.")
       return false
     }
     if (formData.longueur && isNaN(Number.parseFloat(formData.longueur))) {
-      setFormError("Longueur must be a number.")
+      setFormError("La longueur doit être un nombre.")
       return false
     }
     if (formData.largeur && isNaN(Number.parseFloat(formData.largeur))) {
-      setFormError("Largeur must be a number.")
+      setFormError("La largeur doit être un nombre.")
       return false
     }
     setFormError("")
@@ -435,7 +434,7 @@ const Operations = () => {
     const token = localStorage.getItem("token")
     const userId = localStorage.getItem("userId")
     if (!token || !userId) {
-      setFormError("Authentication required. Please log in again.")
+      setFormError("Authentification requise. Veuillez vous reconnecter.")
       localStorage.clear()
       navigate("/login")
       return
@@ -472,19 +471,19 @@ const Operations = () => {
 
       const data = await response.json()
       if (!response.ok) {
-        throw new Error(data.message || "Failed to create operation.")
+        throw new Error(data.message || "Échec de la création de l'opération.")
       }
 
       if (!data.success) {
-        throw new Error(data.message || "Failed to create operation.")
+        throw new Error(data.message || "Échec de la création de l'opération.")
       }
 
       setOperations((prev) => [...prev, data.data])
       setIsCreateModalOpen(false)
       resetForm()
     } catch (err) {
-      console.error("Error creating operation:", err)
-      setFormError(err.message || "Failed to create operation. Please try again.")
+      console.error("Erreur lors de la création de l'opération:", err)
+      setFormError(err.message || "Échec de la création de l'opération. Veuillez réessayer.")
     }
   }
 
@@ -495,7 +494,7 @@ const Operations = () => {
     const token = localStorage.getItem("token")
     const userId = localStorage.getItem("userId")
     if (!token || !userId) {
-      setFormError("Authentication required. Please log in again.")
+      setFormError("Authentification requise. Veuillez vous reconnecter.")
       localStorage.clear()
       navigate("/login")
       return
@@ -532,26 +531,26 @@ const Operations = () => {
 
       const data = await response.json()
       if (!response.ok) {
-        throw new Error(data.message || "Failed to update operation.")
+        throw new Error(data.message || "Échec de la mise à jour de l'opération.")
       }
 
       if (!data.success) {
-        throw new Error(data.message || "Failed to update operation.")
+        throw new Error(data.message || "Échec de la mise à jour de l'opération.")
       }
 
       setOperations((prev) => prev.map((op) => (op._id === data.data._id ? data.data : op)))
       setIsEditModalOpen(false)
       resetForm()
     } catch (err) {
-      console.error("Error updating operation:", err)
-      setFormError(err.message || "Failed to update operation. Please try again.")
+      console.error("Erreur lors de la mise à jour de l'opération:", err)
+      setFormError(err.message || "Échec de la mise à jour de l'opération. Veuillez réessayer.")
     }
   }
 
   const handleDeleteOperation = async () => {
     const token = localStorage.getItem("token")
     if (!token) {
-      setError("Authentication required. Please log in again.")
+      setError("Authentification requise. Veuillez vous reconnecter.")
       localStorage.clear()
       navigate("/login")
       return
@@ -565,27 +564,27 @@ const Operations = () => {
 
       if (response.status === 401) {
         localStorage.clear()
-        setError("Session expired. Please log in again.")
+        setError("Session expirée. Veuillez vous reconnecter.")
         navigate("/login")
         return
       }
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to delete operation")
+        throw new Error(errorData.message || "Échec de la suppression de l'opération")
       }
 
       const data = await response.json()
       if (!data.success) {
-        throw new Error(data.message || "Failed to delete operation")
+        throw new Error(data.message || "Échec de la suppression de l'opération")
       }
 
       setOperations((prev) => prev.filter((op) => op._id !== selectedOperation._id))
       setIsDeleteModalOpen(false)
       setSelectedOperation(null)
     } catch (err) {
-      console.error("Error deleting operation:", err)
-      setError(err.message || "Failed to delete operation. Please try again.")
+      console.error("Erreur lors de la suppression de l'opération:", err)
+      setError(err.message || "Échec de la suppression de l'opération. Veuillez réessayer.")
     }
   }
 
@@ -679,7 +678,7 @@ const Operations = () => {
     switch (state) {
       case "En marche":
         return "success"
-      case "À l’arrêt":
+      case "À l'arrêt":
         return "destructive"
       default:
         return "secondary"
@@ -693,7 +692,7 @@ const Operations = () => {
           <div className="flex items-center justify-center h-screen">
             <Card className="p-6">
               <div className="flex items-center gap-3 text-red-600">
-                <AlertCircle className="h-6 w-6" />
+                <span>⚠️</span>
                 <p className="text-lg font-semibold">{error}</p>
               </div>
             </Card>
@@ -708,76 +707,72 @@ const Operations = () => {
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 p-4 sm:p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <Wrench className="h-8 w-8 text-emerald-600" />
-                    <CardTitle>Operations Management</CardTitle>
-                  </div>
-                  <p className="text-sm text-gray-600">Track and manage mining operations.</p>
+          <div className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 rounded-2xl p-6 sm:p-8 text-white shadow-2xl">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <span>🔧</span>
+                  <h1 className="text-3xl sm:text-4xl font-bold">Gestion des Opérations</h1>
                 </div>
-                <div className="bg-emerald-50 rounded-xl p-4 text-center">
-                  <p className="text-2xl font-bold text-emerald-800">{operations.length}</p>
-                  <p className="text-sm text-gray-600">Total Operations</p>
+                <p className="text-emerald-100 text-lg">Suivre et gérer les opérations minières</p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center">
+                  <div className="text-2xl font-bold">{operations.length}</div>
+                  <div className="text-sm text-emerald-100">Total des Opérations</div>
                 </div>
               </div>
-            </CardHeader>
-          </Card>
+            </div>
+          </div>
 
           {/* Controls */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                  <div className="relative w-full sm:w-64">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Input
-                      placeholder="Search by Fiche ID, Machine, or Poste..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <Select value={filterMethod} onValueChange={(value) => setFilterMethod(value)}>
-                    <SelectItem value="all">All Methods</SelectItem>
-                    {methods.map((method) => (
-                      <SelectItem key={method} value={method}>
-                        {method}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                  <Input
-                    placeholder="Filter by Poste"
-                    value={filterPoste}
-                    onChange={(e) => setFilterPoste(e.target.value)}
-                    className="w-full sm:w-40"
-                  />
-                  <Select value={filterState} onValueChange={(value) => setFilterState(value)}>
-                    <SelectItem value="">All States</SelectItem>
-                    {machineStates.map((state) => (
-                      <SelectItem key={state} value={state}>
-                        {state}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                  <Input
-                    type="date"
-                    value={filterDate}
-                    onChange={(e) => setFilterDate(e.target.value)}
-                    className="w-full sm:w-40"
-                  />
-                </div>
-                <Button onClick={() => setIsCreateModalOpen(true)} className="gap-2 w-full sm:w-auto">
-                  <Plus className="h-4 w-4" /> Add New Operation
-                </Button>
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="flex flex-col sm:flex-row gap-4 flex-1">
+              <div className="relative flex-1 max-w-md">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+                <Input
+                  placeholder="Rechercher par ID Fiche, Machine ou Poste..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
               </div>
-            </CardContent>
-          </Card>
+              <Select value={filterMethod} onValueChange={(value) => setFilterMethod(value)}>
+                <SelectItem value="all">Toutes les Méthodes</SelectItem>
+                {methods.map((method) => (
+                  <SelectItem key={method} value={method}>
+                    {method}
+                  </SelectItem>
+                ))}
+              </Select>
+              <Input
+                placeholder="Filtrer par Poste"
+                value={filterPoste}
+                onChange={(e) => setFilterPoste(e.target.value)}
+                className="w-full sm:w-40"
+              />
+              <Select value={filterState} onValueChange={(value) => setFilterState(value)}>
+                <SelectItem value="all">Tous les États</SelectItem>
+                {machineStates.map((state) => (
+                  <SelectItem key={state} value={state}>
+                    {state}
+                  </SelectItem>
+                ))}
+              </Select>
+              <Input
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className="w-full sm:w-40"
+              />
+            </div>
+            <Button onClick={() => setIsCreateModalOpen(true)} className="gap-2">
+              <span>+</span> Ajouter une Nouvelle Opération
+            </Button>
+          </div>
 
           {/* Operation Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {isLoading ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <Card key={index} className="p-6">
@@ -791,16 +786,16 @@ const Operations = () => {
             ) : filteredOperations.length === 0 ? (
               <div className="col-span-full">
                 <Card className="p-12 text-center">
-                  <Wrench className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No operations found</h3>
+                  <span className="text-4xl text-gray-400 mb-4 block">🔧</span>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucune opération trouvée</h3>
                   <p className="text-gray-600 mb-6">
                     {searchTerm || filterMethod || filterPoste || filterState || filterDate
-                      ? "Try adjusting your search or filter criteria."
-                      : "Get started by adding your first operation."}
+                      ? "Essayez d'ajuster vos critères de recherche ou de filtre."
+                      : "Commencez par ajouter votre première opération."}
                   </p>
                   {!searchTerm && !filterMethod && !filterPoste && !filterState && !filterDate && (
                     <Button onClick={() => setIsCreateModalOpen(true)} className="gap-2">
-                      <Plus className="h-4 w-4" /> Add First Operation
+                      <span>+</span> Ajouter la Première Opération
                     </Button>
                   )}
                 </Card>
@@ -825,21 +820,21 @@ const Operations = () => {
                       >
                         <DropdownMenuTrigger onClick={() => setDropdownOpen(dropdownOpen === op._id ? null : op._id)}>
                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="h-4 w-4" />
+                            <span>⋮</span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent isOpen={dropdownOpen === op._id}>
                           <DropdownMenuItem onClick={() => openViewModal(op)} className="gap-2">
-                            <Eye className="h-4 w-4" /> View Details
+                            <span>👁</span> Voir les Détails
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openEditModal(op)} className="gap-2">
-                            <Edit className="h-4 w-4" /> Edit Operation
+                            <span>✎</span> Modifier l'Opération
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => openDeleteModal(op)}
                             className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
-                            <Trash2 className="h-4 w-4" /> Delete Operation
+                            <span>🗑</span> Supprimer l'Opération
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -854,7 +849,7 @@ const Operations = () => {
                     </div>
                     <div className="space-y-2 text-sm text-gray-600">
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
+                        <span>📅</span>
                         <span>Date: {dayjs(op.interventionDateTime).format("DD/MM/YYYY HH:mm")}</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -873,10 +868,10 @@ const Operations = () => {
                     </div>
                     <div className="flex gap-2 pt-2">
                       <Button variant="outline" size="sm" onClick={() => openViewModal(op)} className="flex-1 gap-1">
-                        <Eye className="h-3 w-3" /> View
+                        <span>👁</span> Voir
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => openEditModal(op)} className="flex-1 gap-1">
-                        <Edit className="h-3 w-3" /> Edit
+                        <span>✎</span> Modifier
                       </Button>
                     </div>
                   </CardContent>
@@ -890,31 +885,31 @@ const Operations = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
-                  <Plus className="h-5 w-5" /> Create New Operation
+                  <span>+</span> Créer une Nouvelle Opération
                 </DialogTitle>
-                <DialogDescription>Add a new operation to the system.</DialogDescription>
+                <DialogDescription>Ajouter une nouvelle opération au système.</DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateOperation} className="space-y-4 p-6 pt-0">
                 {formError && (
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-center gap-2 text-red-700">
-                    <AlertCircle className="h-4 w-4" />
+                  <div className="bg-red-100 border border-red-400 rounded-xl p-3 flex items-center gap-2 text-red-700">
+                    <span>⚠️</span>
                     <span className="text-sm">{formError}</span>
                   </div>
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="ficheId">Fiche ID *</Label>
+                    <Label htmlFor="ficheId">ID Fiche *</Label>
                     <Input
                       id="ficheId"
                       name="ficheId"
                       value={formData.ficheId}
                       onChange={handleInputChange}
-                      placeholder="Enter Fiche ID"
+                      placeholder="Entrer l'ID de la fiche"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="interventionDateTime">Intervention Date *</Label>
+                    <Label htmlFor="interventionDateTime">Date d'Intervention *</Label>
                     <Input
                       id="interventionDateTime"
                       name="interventionDateTime"
@@ -925,7 +920,7 @@ const Operations = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="decapingMethod">Decaping Method *</Label>
+                    <Label htmlFor="decapingMethod">Méthode de Décapage *</Label>
                     <Select
                       value={formData.decapingMethod}
                       onValueChange={(value) => handleSelectChange("decapingMethod", value)}
@@ -943,7 +938,7 @@ const Operations = () => {
                       value={formData.machineId}
                       onValueChange={(value) => handleSelectChange("machineId", value)}
                     >
-                      <SelectItem value="select">Select Machine</SelectItem>
+                      <SelectItem value="">Sélectionner une Machine</SelectItem>
                       {machines
                         .filter((m) => !formData.decapingMethod || m.method === formData.decapingMethod)
                         .map((machine) => (
@@ -960,7 +955,7 @@ const Operations = () => {
                       name="poste"
                       value={formData.poste}
                       onChange={handleInputChange}
-                      placeholder="Enter Poste"
+                      placeholder="Entrer le poste"
                     />
                   </div>
                   <div className="space-y-2">
@@ -970,7 +965,7 @@ const Operations = () => {
                       name="panneau"
                       value={formData.panneau}
                       onChange={handleInputChange}
-                      placeholder="Enter Panneau"
+                      placeholder="Entrer le panneau"
                     />
                   </div>
                   <div className="space-y-2">
@@ -980,7 +975,7 @@ const Operations = () => {
                       name="tranche"
                       value={formData.tranche}
                       onChange={handleInputChange}
-                      placeholder="Enter Tranche"
+                      placeholder="Entrer la tranche"
                     />
                   </div>
                   <div className="space-y-2">
@@ -990,16 +985,16 @@ const Operations = () => {
                       name="niveau"
                       value={formData.niveau}
                       onChange={handleInputChange}
-                      placeholder="Enter Niveau"
+                      placeholder="Entrer le niveau"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="machineState">Machine State</Label>
+                    <Label htmlFor="machineState">État de la Machine</Label>
                     <Select
                       value={formData.machineState}
                       onValueChange={(value) => handleSelectChange("machineState", value)}
                     >
-                      <SelectItem value="state">Select State</SelectItem>
+                      <SelectItem value="">Sélectionner l'État</SelectItem>
                       {machineStates.map((state) => (
                         <SelectItem key={state} value={state}>
                           {state}
@@ -1008,36 +1003,36 @@ const Operations = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="operatingHours">Operating Hours</Label>
+                    <Label htmlFor="operatingHours">Heures de Fonctionnement</Label>
                     <Input
                       id="operatingHours"
                       name="operatingHours"
                       type="number"
                       value={formData.operatingHours}
                       onChange={handleInputChange}
-                      placeholder="Enter hours"
+                      placeholder="Entrer les heures"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="downtime">Downtime</Label>
+                    <Label htmlFor="downtime">Temps d'Arrêt</Label>
                     <Input
                       id="downtime"
                       name="downtime"
                       type="number"
                       value={formData.downtime}
                       onChange={handleInputChange}
-                      placeholder="Enter hours"
+                      placeholder="Entrer les heures"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="skippedVolume">Skipped Volume (m³)</Label>
+                    <Label htmlFor="skippedVolume">Volume Sauté (m³)</Label>
                     <Input
                       id="skippedVolume"
                       name="skippedVolume"
                       type="number"
                       value={formData.skippedVolume}
                       onChange={handleInputChange}
-                      placeholder="Enter volume"
+                      placeholder="Entrer le volume"
                     />
                   </div>
                   <div className="space-y-2">
@@ -1048,7 +1043,7 @@ const Operations = () => {
                       type="number"
                       value={formData.profondeur}
                       onChange={handleInputChange}
-                      placeholder="Enter depth"
+                      placeholder="Entrer la profondeur"
                     />
                   </div>
                   <div className="space-y-2">
@@ -1059,7 +1054,7 @@ const Operations = () => {
                       type="number"
                       value={formData.nombreTrous}
                       onChange={handleInputChange}
-                      placeholder="Enter number"
+                      placeholder="Entrer le nombre"
                     />
                   </div>
                   <div className="space-y-2">
@@ -1070,7 +1065,7 @@ const Operations = () => {
                       type="number"
                       value={formData.longueur}
                       onChange={handleInputChange}
-                      placeholder="Enter length"
+                      placeholder="Entrer la longueur"
                     />
                   </div>
                   <div className="space-y-2">
@@ -1081,7 +1076,7 @@ const Operations = () => {
                       type="number"
                       value={formData.largeur}
                       onChange={handleInputChange}
-                      placeholder="Enter width"
+                      placeholder="Entrer la largeur"
                     />
                   </div>
                   <div className="space-y-2 col-span-2">
@@ -1091,12 +1086,12 @@ const Operations = () => {
                       name="observations"
                       value={formData.observations}
                       onChange={handleInputChange}
-                      placeholder="Enter observations"
+                      placeholder="Entrer les observations"
                       rows={4}
                     />
                   </div>
                   <div className="col-span-2">
-                    <h3 className="text-lg font-medium text-emerald-800 mb-2">Calculated Metrics</h3>
+                    <h3 className="text-lg font-medium text-emerald-800 mb-2">Métriques Calculées</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="p-2 bg-gray-50 rounded-xl">
                         <p className="text-sm text-gray-600">Métrage</p>
@@ -1128,10 +1123,10 @@ const Operations = () => {
                     onClick={() => setIsCreateModalOpen(false)}
                     className="flex-1"
                   >
-                    Cancel
+                    Annuler
                   </Button>
                   <Button type="submit" className="flex-1 gap-2">
-                    <Check className="h-4 w-4" /> Create Operation
+                    <span>✔</span> Créer l'Opération
                   </Button>
                 </div>
               </form>
@@ -1143,31 +1138,31 @@ const Operations = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
-                  <Edit className="h-5 w-5" /> Edit Operation
+                  <span>✎</span> Modifier l'Opération
                 </DialogTitle>
-                <DialogDescription>Update operation details.</DialogDescription>
+                <DialogDescription>Mettre à jour les détails de l'opération.</DialogDescription>
               </DialogHeader>
               <form onSubmit={handleEditOperation} className="space-y-4 p-6 pt-4">
                 {formError && (
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-center gap-2 text-red-700">
-                    <AlertCircle className="h-4 w-4" />
+                  <div className="bg-red-100 border border-red-400 rounded-xl p-3 flex items-center gap-2 text-red-700">
+                    <span>⚠️</span>
                     <span className="text-sm">{formError}</span>
                   </div>
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="ficheId">Fiche ID *</Label>
+                    <Label htmlFor="ficheId">ID Fiche *</Label>
                     <Input
                       id="ficheId"
                       name="ficheId"
                       value={formData.ficheId}
                       onChange={handleInputChange}
-                      placeholder="Enter Fiche ID"
+                      placeholder="Entrer l'ID de la fiche"
                       disabled
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="interventionDateTime">Intervention Date *</Label>
+                    <Label htmlFor="interventionDateTime">Date d'Intervention *</Label>
                     <Input
                       id="interventionDateTime"
                       name="interventionDateTime"
@@ -1178,7 +1173,7 @@ const Operations = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="decapingMethod">Decaping Method *</Label>
+                    <Label htmlFor="decapingMethod">Méthode de Décapage *</Label>
                     <Select
                       value={formData.decapingMethod}
                       onValueChange={(value) => handleSelectChange("decapingMethod", value)}
@@ -1196,7 +1191,7 @@ const Operations = () => {
                       value={formData.machineId}
                       onValueChange={(value) => handleSelectChange("machineId", value)}
                     >
-                      <SelectItem value="select">Select Machine</SelectItem>
+                      <SelectItem value="">Sélectionner une Machine</SelectItem>
                       {machines
                         .filter((m) => !formData.decapingMethod || m.method === formData.decapingMethod)
                         .map((machine) => (
@@ -1247,12 +1242,12 @@ const Operations = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="machineState">Machine State</Label>
+                    <Label htmlFor="machineState">État de la Machine</Label>
                     <Select
                       value={formData.machineState}
                       onValueChange={(value) => handleSelectChange("machineState", value)}
                     >
-                      <SelectItem value="state">Select State</SelectItem>
+                      <SelectItem value="">Sélectionner l'État</SelectItem>
                       {machineStates.map((state) => (
                         <SelectItem key={state} value={state}>
                           {state}
@@ -1261,29 +1256,29 @@ const Operations = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="operatingHours">Operating Hours</Label>
+                    <Label htmlFor="operatingHours">Heures de Fonctionnement</Label>
                     <Input
                       id="operatingHours"
                       name="operatingHours"
                       type="number"
                       value={formData.operatingHours}
                       onChange={handleInputChange}
-                      placeholder="Hours"
+                      placeholder="Heures"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="downtime">Downtime</Label>
+                    <Label htmlFor="downtime">Temps d'Arrêt</Label>
                     <Input
                       id="downtime"
                       name="downtime"
                       type="number"
                       value={formData.downtime}
                       onChange={handleInputChange}
-                      placeholder="Hours"
+                      placeholder="Heures"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="skippedVolume">Skipped Volume (m³)</Label>
+                    <Label htmlFor="skippedVolume">Volume Sauté (m³)</Label>
                     <Input
                       id="skippedVolume"
                       name="skippedVolume"
@@ -1301,7 +1296,7 @@ const Operations = () => {
                       type="number"
                       value={formData.profondeur}
                       onChange={handleInputChange}
-                      placeholder="Depth"
+                      placeholder="Profondeur"
                     />
                   </div>
                   <div className="space-y-2">
@@ -1312,7 +1307,7 @@ const Operations = () => {
                       type="number"
                       value={formData.nombreTrous}
                       onChange={handleInputChange}
-                      placeholder="Number"
+                      placeholder="Nombre"
                     />
                   </div>
                   <div className="space-y-2">
@@ -1323,7 +1318,7 @@ const Operations = () => {
                       type="number"
                       value={formData.longueur}
                       onChange={handleInputChange}
-                      placeholder="Length"
+                      placeholder="Longueur"
                     />
                   </div>
                   <div className="space-y-2">
@@ -1334,7 +1329,7 @@ const Operations = () => {
                       type="number"
                       value={formData.largeur}
                       onChange={handleInputChange}
-                      placeholder="Width"
+                      placeholder="Largeur"
                     />
                   </div>
                   <div className="space-y-2 col-span-2">
@@ -1349,7 +1344,7 @@ const Operations = () => {
                     />
                   </div>
                   <div className="col-span-2">
-                    <h3 className="text-lg font-medium text-emerald-800 mb-2">Calculated Metrics</h3>
+                    <h3 className="text-lg font-medium text-emerald-800 mb-2">Métriques Calculées</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="p-2 bg-gray-50 rounded-xl">
                         <p className="text-sm text-gray-600">Métrage</p>
@@ -1381,10 +1376,10 @@ const Operations = () => {
                     onClick={() => setIsEditModalOpen(false)}
                     className="flex-1"
                   >
-                    Cancel
+                    Annuler
                   </Button>
                   <Button type="submit" className="flex-1 gap-2">
-                    <Check className="h-4 w-4" /> Update Operation
+                    <span>✔</span> Mettre à Jour l'Opération
                   </Button>
                 </div>
               </form>
@@ -1396,15 +1391,15 @@ const Operations = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
-                  <Eye className="h-5 w-5" /> Operation Details
+                  <span>👁</span> Détails de l'Opération
                 </DialogTitle>
-                <DialogDescription>Complete information for {selectedOperation?.ficheId}</DialogDescription>
+                <DialogDescription>Informations complètes pour {selectedOperation?.ficheId}</DialogDescription>
               </DialogHeader>
               {selectedOperation && (
                 <div className="p-6 pt-0 space-y-6">
                   {/* Header Section */}
-                  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100">
-                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                  <div className="flex items-center gap-4 p-4 bg-emerald-50 rounded-xl">
+                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center text-white font-bold text-2xl">
                       {selectedOperation.ficheId.charAt(0).toUpperCase()}
                     </div>
                     <div>
@@ -1427,55 +1422,53 @@ const Operations = () => {
                   <div className="space-y-4">
                     <h4 className="text-lg font-semibold text-emerald-800 flex items-center gap-2">
                       <div className="h-5 w-1 bg-emerald-500 rounded-full"></div>
-                      General Information
+                      Informations Générales
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                        <Calendar className="h-5 w-5 text-emerald-600" />
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                        <span>📅</span>
                         <div>
-                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Intervention Date
-                          </p>
+                          <p className="text-sm text-gray-600">Date d'Intervention</p>
                           <p className="font-medium">
                             {dayjs(selectedOperation.interventionDateTime).format("DD/MM/YYYY HH:mm")}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                        <Wrench className="h-5 w-5 text-emerald-600" />
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                        <span>🔧</span>
                         <div>
-                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Machine</p>
+                          <p className="text-sm text-gray-600">Machine</p>
                           <p className="font-medium">{selectedOperation.machine?.name || "N/A"}</p>
                         </div>
                       </div>
                       {selectedOperation.poste && (
-                        <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                           <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Poste</p>
+                            <p className="text-sm text-gray-600">Poste</p>
                             <p className="font-medium">{selectedOperation.poste}</p>
                           </div>
                         </div>
                       )}
                       {selectedOperation.panneau && (
-                        <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                           <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Panneau</p>
+                            <p className="text-sm text-gray-600">Panneau</p>
                             <p className="font-medium">{selectedOperation.panneau}</p>
                           </div>
                         </div>
                       )}
                       {selectedOperation.tranche && (
-                        <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                           <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Tranche</p>
+                            <p className="text-sm text-gray-600">Tranche</p>
                             <p className="font-medium">{selectedOperation.tranche}</p>
                           </div>
                         </div>
                       )}
                       {selectedOperation.niveau && (
-                        <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                           <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Niveau</p>
+                            <p className="text-sm text-gray-600">Niveau</p>
                             <p className="font-medium">{selectedOperation.niveau}</p>
                           </div>
                         </div>
@@ -1487,65 +1480,61 @@ const Operations = () => {
                   <div className="space-y-4">
                     <h4 className="text-lg font-semibold text-emerald-800 flex items-center gap-2">
                       <div className="h-5 w-1 bg-emerald-500 rounded-full"></div>
-                      Operational Metrics
+                      Métriques Opérationnelles
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {selectedOperation.operatingHours !== undefined && (
-                        <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                           <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Operating Hours
-                            </p>
+                            <p className="text-sm text-gray-600">Heures de Fonctionnement</p>
                             <p className="font-medium">{selectedOperation.operatingHours} h</p>
                           </div>
                         </div>
                       )}
                       {selectedOperation.downtime !== undefined && (
-                        <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                           <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Downtime</p>
+                            <p className="text-sm text-gray-600">Temps d'Arrêt</p>
                             <p className="font-medium">{selectedOperation.downtime} h</p>
                           </div>
                         </div>
                       )}
                       {selectedOperation.skippedVolume !== undefined && (
-                        <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                           <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Skipped Volume</p>
+                            <p className="text-sm text-gray-600">Volume Sauté</p>
                             <p className="font-medium">{selectedOperation.skippedVolume} m³</p>
                           </div>
                         </div>
                       )}
                       {selectedOperation.profondeur !== undefined && (
-                        <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                           <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Profondeur</p>
+                            <p className="text-sm text-gray-600">Profondeur</p>
                             <p className="font-medium">{selectedOperation.profondeur} m</p>
                           </div>
                         </div>
                       )}
                       {selectedOperation.nombreTrous !== undefined && (
-                        <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                           <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Nombre de Trous
-                            </p>
+                            <p className="text-sm text-gray-600">Nombre de Trous</p>
                             <p className="font-medium">{selectedOperation.nombreTrous}</p>
                           </div>
                         </div>
                       )}
                       {selectedOperation.longueur !== undefined && (
-                        <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                           <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Longueur</p>
+                            <p className="text-sm text-gray-600">Longueur</p>
                             <p className="font-medium">{selectedOperation.longueur} m</p>
                           </div>
                         </div>
                       )}
                       {selectedOperation.largeur !== undefined && (
-                        <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                           <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Largeur</p>
+                            <p className="text-sm text-gray-600">Largeur</p>
                             <p className="font-medium">{selectedOperation.largeur} m</p>
                           </div>
                         </div>
@@ -1558,31 +1547,29 @@ const Operations = () => {
                     <div className="space-y-4">
                       <h4 className="text-lg font-semibold text-emerald-800 flex items-center gap-2">
                         <div className="h-5 w-1 bg-emerald-500 rounded-full"></div>
-                        Calculated Metrics
+                        Métriques Calculées
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {selectedOperation.metrics.metrage && (
-                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl">
                             <div>
-                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Métrage</p>
+                              <p className="text-sm text-gray-600">Métrage</p>
                               <p className="font-medium text-emerald-700">{selectedOperation.metrics.metrage} m</p>
                             </div>
                           </div>
                         )}
                         {selectedOperation.metrics.yield && (
-                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl">
                             <div>
-                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Rendement</p>
+                              <p className="text-sm text-gray-600">Rendement</p>
                               <p className="font-medium text-emerald-700">{selectedOperation.metrics.yield} m/h</p>
                             </div>
                           </div>
                         )}
                         {selectedOperation.metrics.decapedVolume && (
-                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl">
                             <div>
-                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Volume Décapé
-                              </p>
+                              <p className="text-sm text-gray-600">Volume Décapé</p>
                               <p className="font-medium text-emerald-700">
                                 {selectedOperation.metrics.decapedVolume} m³
                               </p>
@@ -1590,21 +1577,17 @@ const Operations = () => {
                           </div>
                         )}
                         {selectedOperation.metrics.availability && (
-                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl">
                             <div>
-                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Disponibilité
-                              </p>
+                              <p className="text-sm text-gray-600">Disponibilité</p>
                               <p className="font-medium text-emerald-700">{selectedOperation.metrics.availability}%</p>
                             </div>
                           </div>
                         )}
                         {selectedOperation.metrics.workCycle && (
-                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow sm:col-span-2">
+                          <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl sm:col-span-2">
                             <div>
-                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Cycle de Travail
-                              </p>
+                              <p className="text-sm text-gray-600">Cycle de Travail</p>
                               <p className="font-medium text-emerald-700">{selectedOperation.metrics.workCycle}</p>
                             </div>
                           </div>
@@ -1615,8 +1598,8 @@ const Operations = () => {
 
                   {/* Observations */}
                   {selectedOperation.observations && (
-                    <div className="p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Observations</p>
+                    <div className="p-4 bg-gray-50 rounded-xl">
+                      <p className="text-sm text-gray-600 mb-2">Observations</p>
                       <p className="font-medium">{selectedOperation.observations}</p>
                     </div>
                   )}
@@ -1624,7 +1607,7 @@ const Operations = () => {
                   {/* Action Buttons */}
                   <div className="flex gap-3 pt-4">
                     <Button variant="secondary" onClick={() => setIsViewModalOpen(false)} className="flex-1">
-                      Close
+                      Fermer
                     </Button>
                     <Button
                       onClick={() => {
@@ -1633,7 +1616,7 @@ const Operations = () => {
                       }}
                       className="flex-1 gap-2"
                     >
-                      <Edit className="h-4 w-4" /> Edit Operation
+                      <span>✎</span> Modifier l'Opération
                     </Button>
                   </div>
                 </div>
@@ -1646,27 +1629,27 @@ const Operations = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2 text-red-600">
-                  <AlertCircle className="h-5 w-5" /> Confirm Deletion
+                  <span>⚠️</span> Confirmer la Suppression
                 </DialogTitle>
                 <DialogDescription>
-                  This action cannot be undone. This will permanently delete the operation.
+                  Cette action ne peut pas être annulée. Cela supprimera définitivement l'opération.
                 </DialogDescription>
               </DialogHeader>
               {selectedOperation && (
                 <div className="p-6 pt-0 space-y-4">
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                    <p className="text-sm text-red-800">
-                      Are you sure you want to delete <span className="font-semibold">{selectedOperation.ficheId}</span>
-                      ?
+                  <div className="bg-red-100 border border-red-400 rounded-xl p-4">
+                    <p className="text-sm text-red-700">
+                      Êtes-vous sûr de vouloir supprimer{" "}
+                      <span className="font-semibold">{selectedOperation.ficheId}</span> ?
                     </p>
-                    <p className="text-sm text-red-600 mt-1">Method: {selectedOperation.decapingMethod}</p>
+                    <p className="text-sm text-red-600 mt-1">Méthode: {selectedOperation.decapingMethod}</p>
                   </div>
                   <div className="flex gap-3">
                     <Button variant="secondary" onClick={() => setIsDeleteModalOpen(false)} className="flex-1">
-                      Cancel
+                      Annuler
                     </Button>
                     <Button variant="destructive" onClick={handleDeleteOperation} className="flex-1 gap-2">
-                      <Trash2 className="h-4 w-4" /> Delete Operation
+                      <span>🗑</span> Supprimer l'Opération
                     </Button>
                   </div>
                 </div>

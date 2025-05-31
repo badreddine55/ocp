@@ -554,13 +554,18 @@ const MachinesPage = () => {
                       </div>
                       <DropdownMenu open={dropdownOpen === machine._id} onOpenChange={(open) => setDropdownOpen(open ? machine._id : null)}>
                         <DropdownMenuTrigger onClick={() => setDropdownOpen(dropdownOpen === machine._id ? null : machine._id)}>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><MoreVertical className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-red-600"><MoreVertical className="h-4 w-4" /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent isOpen={dropdownOpen === machine._id}>
-                          <DropdownMenuItem onClick={() => openViewModal(machine)} className="gap-2"><Eye className="h-4 w-4" /> View Details</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openEditModal(machine)} className="gap-2"><Edit className="h-4 w-4" /> Edit Machine</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openDeleteModal(machine)} className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"><Trash2 className="h-4 w-4" /> Delete Machine</DropdownMenuItem>
-                        </DropdownMenuContent>
+  <DropdownMenuItem
+    onClick={() => openDeleteModal(machine)}
+    className="gap-3 text-red-600 hover:text-red-700 hover:bg-red-50 text-sm py-3"
+  >
+    <Trash2 className="h-5 w-5" />
+    <span className="text-base font-medium">Delete Machine</span>
+  </DropdownMenuItem>
+</DropdownMenuContent>
+
                       </DropdownMenu>
                     </div>
                   </CardHeader>

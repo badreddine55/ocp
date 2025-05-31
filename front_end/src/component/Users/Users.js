@@ -678,25 +678,11 @@ const UsersM = () => {
                         onOpenChange={(open) => setDropdownOpen(open ? user._id : null)}
                       >
                         <DropdownMenuTrigger onClick={() => setDropdownOpen(dropdownOpen === user._id ? null : user._id)}>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-red-600">
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent isOpen={dropdownOpen === user._id}>
-                          <DropdownMenuItem
-                            onClick={() => openViewModal(user)}
-                            className="gap-2"
-                          >
-                            <Eye className="h-4 w-4" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => openEditModal(user)}
-                            className="gap-2"
-                          >
-                            <Edit className="h-4 w-4" />
-                            Edit User
-                          </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => openDeleteModal(user)}
                             className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"

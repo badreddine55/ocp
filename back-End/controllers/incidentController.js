@@ -26,21 +26,10 @@ const upload = multer({
     if (extname && mimetype) {
       return cb(null, true);
     }
-    cb(new Error('Only JPEG, JPG, PNG, or PDF files are allowed'));
+    cb(new Error('Seuls les fichiers JPEG, JPG, PNG ou PDF sont autorisés'));
   },
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
 }).fields([{ name: 'attachments', maxCount: 5 }]);
-
-// Validation helpers
-const validateSeverityLevel = (level) => {
-  const validLevels = ['Minor', 'Moderate', 'Major', 'Critical'];
-  return validLevels.includes(level);
-};
-
-const validateStatus = (status) => {
-  const validStatuses = ['Open', 'In Progress', 'Resolved', 'Closed'];
-  return validStatuses.includes(status);
-};
 
 // Create a new Incident
 const createIncident = async (req, res) => {
@@ -49,7 +38,7 @@ const createIncident = async (req, res) => {
       if (err) {
         return res.status(400).json({
           success: false,
-          message: err.message || 'Error uploading files',
+          message: err.message || 'Erreur lors du téléchargement des fichiers',
         });
       }
 
@@ -68,38 +57,29 @@ const createIncident = async (req, res) => {
         injuryTypes,
         injuryTimes,
         status,
-        correctiveActions,
       } = req.body;
 
       // Validate required fields
       if (!incidentDateTime || !severityLevel || !status) {
         return res.status(400).json({
           success: false,
-          message: 'Incident date, severity level, and status are required',
+          message: 'La date de l\'incident, le niveau de gravité et le statut sont requis',
         });
       }
 
       // Validate IDs
       if (machine && !ObjectId.isValid(machine)) {
-        return res.status(400).json({ success: false, message: 'Invalid machine ID' });
+        return res.status(400).json({ success: false, message: 'ID de machine invalide' });
       }
       if (declarant && !ObjectId.isValid(declarant)) {
-        return res.status(400).json({ success: false, message: 'Invalid declarant ID' });
-      }
-
-      // Validate enums
-      if (!validateSeverityLevel(severityLevel)) {
-        return res.status(400).json({ success: false, message: 'Invalid severity level' });
-      }
-      if (!validateStatus(status)) {
-        return res.status(400).json({ success: false, message: 'Invalid status' });
+        return res.status(400).json({ success: false, message: 'ID de déclarant invalide' });
       }
 
       // Validate declarant exists
       if (declarant) {
         const user = await User.findById(declarant);
         if (!user) {
-          return res.status(400).json({ success: false, message: 'Declarant not found' });
+          return res.status(400).json({ success: false, message: 'Déclarant non trouvé' });
         }
       }
 
@@ -107,7 +87,7 @@ const createIncident = async (req, res) => {
       if (machine) {
         const machineExists = await Machine.findById(machine);
         if (!machineExists) {
-          return res.status(400).json({ success: false, message: 'Machine not found' });
+          return res.status(400).json({ success: false, message: 'Machine non trouvée' });
         }
       }
 
@@ -127,11 +107,10 @@ const createIncident = async (req, res) => {
         operationStopped: operationStopped === 'true' || operationStopped === true,
         zoneSecured: zoneSecured === 'true' || zoneSecured === true,
         injuries: injuries === 'true' || injuries === true,
-        injuredNames: injuredNames ? (Array.isArray(injuredNames) ? injuredNames : [injuredNames]) : [],
-        injuryTypes: injuryTypes ? (Array.isArray(injuryTypes) ? injuryTypes : [injuryTypes]) : [],
-        injuryTimes: injuryTimes ? (Array.isArray(injuryTimes) ? injuryTimes : [injuryTimes]) : [],
+        injuredNames: injuredNames ? (Array.isArray(injuredNames) ? injuredNames : injuredNames.split(',').map(item => item.trim())) : [],
+        injuryTypes: injuryTypes ? (Array.isArray(injuryTypes) ? injuryTypes : injuryTypes.split(',').map(item => item.trim())) : [],
+        injuryTimes: injuryTimes ? (Array.isArray(injuryTimes) ? injuryTimes : injuryTimes.split(',').map(item => item.trim())) : [],
         status,
-        correctiveActions: correctiveActions || null,
       });
 
       const savedIncident = await incident.save();
@@ -142,36 +121,36 @@ const createIncident = async (req, res) => {
       res.status(201).json({
         success: true,
         data: populatedIncident,
-        message: 'Incident created successfully',
+        message: 'Incident créé avec succès',
       });
     } catch (error) {
-      console.error('Error creating incident:', error);
+      console.error('Erreur lors de la création de l\'incident:', error);
       res.status(400).json({
         success: false,
-        message: 'Failed to create incident',
-        error: error.message,
+        message: error.message || 'Échec de la création de l\'incident',
       });
     }
   });
 };
 
+// Update an Incident
 const updateIncident = async (req, res) => {
   upload(req, res, async (err) => {
     try {
       if (err) {
         return res.status(400).json({
           success: false,
-          message: err.message || 'Error uploading files',
+          message: err.message || 'Erreur lors du téléchargement des fichiers',
         });
       }
 
       if (!ObjectId.isValid(req.params.id)) {
-        return res.status(400).json({ success: false, message: 'Invalid incident ID' });
+        return res.status(400).json({ success: false, message: 'ID d\'incident invalide' });
       }
 
       const incident = await Incident.findById(req.params.id);
       if (!incident) {
-        return res.status(404).json({ success: false, message: 'Incident not found' });
+        return res.status(404).json({ success: false, message: 'Incident non trouvé' });
       }
 
       const {
@@ -189,7 +168,6 @@ const updateIncident = async (req, res) => {
         injuryTypes,
         injuryTimes,
         status,
-        correctiveActions,
       } = req.body;
 
       // Update fields if provided
@@ -198,26 +176,25 @@ const updateIncident = async (req, res) => {
       if (niveau !== undefined) incident.niveau = niveau || null;
       if (machine) {
         if (!ObjectId.isValid(machine)) {
-          return res.status(400).json({ success: false, message: 'Invalid machine ID' });
+          return res.status(400).json({ success: false, message: 'ID de machine invalide' });
         }
         const machineExists = await Machine.findById(machine);
         if (!machineExists) {
-          return res.status(400).json({ success: false, message: 'Machine not found' });
+          return res.status(400).json({ success: false, message: 'Machine non trouvée' });
         }
         incident.machine = machine;
       }
       if (severityLevel) {
-
         incident.severityLevel = severityLevel;
       }
       if (description !== undefined) incident.description = description;
       if (declarant) {
         if (!ObjectId.isValid(declarant)) {
-          return res.status(400).json({ success: false, message: 'Invalid declarant ID' });
+          return res.status(400).json({ success: false, message: 'ID de déclarant invalide' });
         }
         const user = await User.findById(declarant);
         if (!user) {
-          return res.status(400).json({ success: false, message: 'Declarant not found' });
+          return res.status(400).json({ success: false, message: 'Déclarant non trouvé' });
         }
         incident.declarant = declarant;
       }
@@ -235,22 +212,16 @@ const updateIncident = async (req, res) => {
         incident.injuries = injuries === 'true' || injuries === true;
       }
       if (injuredNames) {
-        incident.injuredNames = Array.isArray(injuredNames) ? injuredNames : [injuredNames];
+        incident.injuredNames = Array.isArray(injuredNames) ? injuredNames : injuredNames.split(',').map(item => item.trim());
       }
       if (injuryTypes) {
-        incident.injuryTypes = Array.isArray(injuryTypes) ? injuryTypes : [injuryTypes];
+        incident.injuryTypes = Array.isArray(injuryTypes) ? injuryTypes : injuryTypes.split(',').map(item => item.trim());
       }
       if (injuryTimes) {
-        incident.injuryTimes = Array.isArray(injuryTimes) ? injuryTimes : [injuryTimes];
+        incident.injuryTimes = Array.isArray(injuryTimes) ? injuryTimes : injuryTimes.split(',').map(item => new Date(item.trim()));
       }
       if (status) {
-        if (!validateStatus(status)) {
-          return res.status(400).json({ success: false, message: 'Invalid status' });
-        }
         incident.status = status;
-      }
-      if (correctiveActions !== undefined) {
-        incident.correctiveActions = correctiveActions || null;
       }
 
       const updatedIncident = await incident.save();
@@ -261,14 +232,13 @@ const updateIncident = async (req, res) => {
       res.status(200).json({
         success: true,
         data: populatedIncident,
-        message: 'Incident updated successfully',
+        message: 'Incident mis à jour avec succès',
       });
     } catch (error) {
-      console.error('Error updating incident:', error);
+      console.error('Erreur lors de la mise à jour de l\'incident:', error);
       res.status(400).json({
         success: false,
-        message: 'Failed to update incident',
-        error: error.message,
+        message: error.message || 'Échec de la mise à jour de l\'incident',
       });
     }
   });
@@ -284,13 +254,13 @@ const getAllIncidents = async (req, res) => {
     res.status(200).json({
       success: true,
       data: incidents,
-      message: 'Incidents retrieved successfully',
+      message: 'Incidents récupérés avec succès',
     });
   } catch (error) {
-    console.error('Error fetching incidents:', error);
+    console.error('Erreur lors de la récupération des incidents:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch incidents',
+      message: 'Échec de la récupération des incidents',
       error: error.message,
     });
   }
@@ -300,24 +270,24 @@ const getAllIncidents = async (req, res) => {
 const getIncidentById = async (req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid incident ID' });
+      return res.status(400).json({ success: false, message: 'ID d\'incident invalide' });
     }
     const incident = await Incident.findById(req.params.id)
       .populate('machine', '_id name')
       .populate('declarant', '_id name email');
     if (!incident) {
-      return res.status(404).json({ success: false, message: 'Incident not found' });
+      return res.status(404).json({ success: false, message: 'Incident non trouvé' });
     }
     res.status(200).json({
       success: true,
       data: incident,
-      message: 'Incident retrieved successfully',
+      message: 'Incident récupéré avec succès',
     });
   } catch (error) {
-    console.error('Error fetching incident:', error);
+    console.error('Erreur lors de la récupération de l\'incident:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch incident',
+      message: 'Échec de la récupération de l\'incident',
       error: error.message,
     });
   }
@@ -327,11 +297,11 @@ const getIncidentById = async (req, res) => {
 const deleteIncident = async (req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid incident ID' });
+      return res.status(400).json({ success: false, message: 'ID d\'incident invalide' });
     }
     const incident = await Incident.findById(req.params.id);
     if (!incident) {
-      return res.status(404).json({ success: false, message: 'Incident not found' });
+      return res.status(404).json({ success: false, message: 'Incident non trouvé' });
     }
 
     // Delete associated attachments
@@ -340,7 +310,7 @@ const deleteIncident = async (req, res) => {
         try {
           await fs.unlink(path.join(__dirname, '..', attachment));
         } catch (err) {
-          console.warn('Failed to delete attachment:', err.message);
+          console.warn('Échec de la suppression de la pièce jointe:', err.message);
         }
       }
     }
@@ -348,13 +318,13 @@ const deleteIncident = async (req, res) => {
     await incident.deleteOne();
     res.status(200).json({
       success: true,
-      message: 'Incident deleted successfully',
+      message: 'Incident supprimé avec succès',
     });
   } catch (error) {
-    console.error('Error deleting incident:', error);
+    console.error('Erreur lors de la suppression de l\'incident:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete incident',
+      message: 'Échec de la suppression de l\'incident',
       error: error.message,
     });
   }
@@ -367,13 +337,13 @@ const getIncidentsCount = async (req, res) => {
     res.status(200).json({
       success: true,
       data: { count },
-      message: 'Incidents count retrieved successfully',
+      message: 'Nombre d\'incidents récupéré avec succès',
     });
   } catch (error) {
-    console.error('Error fetching incidents count:', error);
+    console.error('Erreur lors de la récupération du nombre d\'incidents:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch incidents count',
+      message: 'Échec de la récupération du nombre d\'incidents',
       error: error.message,
     });
   }
@@ -389,7 +359,7 @@ const getRecentIncidents = async (req, res) => {
       .lean();
 
     const formattedIncidents = incidents.map((incident) => ({
-      title: incident.description || 'Incident reported',
+      title: incident.description || 'Incident signalé',
       severity: incident.severityLevel,
       status: incident.status.toLowerCase().replace(' ', '-'),
       createdAt: incident.createdAt,
@@ -398,13 +368,13 @@ const getRecentIncidents = async (req, res) => {
     res.status(200).json({
       success: true,
       data: formattedIncidents,
-      message: 'Recent incidents retrieved successfully',
+      message: 'Incidents récents récupérés avec succès',
     });
   } catch (error) {
-    console.error('Error fetching recent incidents:', error);
+    console.error('Erreur lors de la récupération des incidents récents:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch recent incidents',
+      message: 'Échec de la récupération des incidents récents',
       error: error.message,
     });
   }
